@@ -1,1 +1,9 @@
+tensorflow===2.10.0
+torch
+keras===2.10.0
 transformers
+datasets
+sentencepiece
+evaluate
+nltk
+rouge_score

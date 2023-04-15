@@ -1,6 +1,7 @@
 """Question answering (Qu-An)."""
 import transformers
 from transformers import pipeline
+from evaluate import load
 
 # Set to avoid warning messages
 transformers.logging.set_verbosity_error()
@@ -20,3 +21,31 @@ print(quan_pipeline(question="How much of earth is land?", context=context))
 
 print("\nAnother question :")
 print(quan_pipeline(question="How are mountain ranges created?", context=context))
+
+squad_metric = load("squad_v2")
+
+# Ignoring Context & Question as they are not needed for evaluation
+# This example is to showcase how the evaluation works based on match between the prediction and the correct answer
+
+correct_answer = "Paris"
+
+predicted_answers = ["Paris", "London", "Paris is one of the best cities in the world"]
+
+cum_predictions = []
+cum_references = []
+
+for i in range(len(predicted_answers)):
+    # Use the input format for predictions
+    predictions = [{'prediction_text': predicted_answers[i], 'id': str(i), 'no_answer_probability': 0.}]
+    cum_predictions.append(predictions[0])
+
+    # Use the input format for answers
+    references = [{'answers': {'answer_start': [1], 'text': [correct_answer]}, 'id': str(i)}]
+    cum_references.append(references[0])
+
+    results = squad_metric.compute(predictions=predictions, references=references)
+    print("F1 is", results.get('f1'), " for answer :", predicted_answers[i])
+
+# Compute for cumulative Results
+cum_results = squad_metric.compute(predictions=cum_predictions, references=cum_references)
+print("\n Cumulative Results : \n", cum_results)
